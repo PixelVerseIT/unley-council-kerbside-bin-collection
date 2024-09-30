@@ -7,17 +7,20 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black">
     <meta name="apple-mobile-web-app-title" content="Bin Reminder">
-    <link rel="apple-touch-icon" href="/api/placeholder/180/180">
+    <link rel="apple-touch-icon" href="image.png">
     <title>Kerbside Collection Reminder</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Roboto', sans-serif;
             max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            background-color: #f4f4f9;
+            color: #333;
         }
         h1, h2 {
-            color: #0066cc;
+            color: #333;
+            font-weight: 300;
         }
         #app {
             display: flex;
@@ -25,19 +28,23 @@
             gap: 20px;
         }
         #settings, #next-collection, #calendar {
-            border: 1px solid #ccc;
-            padding: 15px;
-            border-radius: 5px;
+            background-color: #fff;
+            border: 1px solid #e0e0e0;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
         }
         #calendar {
             display: grid;
             grid-template-columns: repeat(7, 1fr);
-            gap: 5px;
+            gap: 10px;
         }
         .calendar-day {
-            border: 1px solid #ddd;
-            padding: 5px;
+            border: 1px solid #e0e0e0;
+            padding: 10px;
             text-align: center;
+            border-radius: 5px;
+            background-color: #fff;
         }
         .calendar-day.collection-day {
             background-color: #e6f3ff;
@@ -47,10 +54,25 @@
             height: 20px;
             display: inline-block;
             margin-right: 5px;
+            border-radius: 50%;
         }
-        .bin-green { background-color: green; }
-        .bin-yellow { background-color: yellow; }
-        .bin-blue { background-color: blue; }
+        .bin-green { background-color: #4caf50; }
+        .bin-yellow { background-color: #ffce46; }
+        .bin-blue { background-color: #2196f3; }
+        select {
+            padding: 10px;
+            border: 1px solid #e0e0e0;
+            border-radius: 5px;
+            background-color: #fff;
+            font-size: 16px;
+        }
+        ul {
+            list-style-type: none;
+            padding: 0;
+        }
+        li {
+            margin: 10px 0;
+        }
     </style>
 </head>
 <body>
@@ -73,7 +95,6 @@
 
         <h2>Collection Calendar</h2>
         <div id="calendar">
-           
             <!-- Calendar will be populated by JavaScript -->
         </div>
     </div>
@@ -167,7 +188,7 @@
             if (Notification.permission === "granted") {
                 new Notification("Bin Collection Reminder", {
                     body: message,
-                    icon: "/api/placeholder/64/64"
+                    icon: "image.png"
                 });
             }
         }
@@ -200,6 +221,15 @@
             }
         }
 
+        function sendTestNofication() {
+            if (Notification.permission === "granted") {
+                new Notification("Test Notification", {
+                    body: "This is a test notification from the Bin Reminder app.",
+                    icon: "image.png"
+                });
+            }
+        }
+
         areaSelect.addEventListener('change', (event) => {
             userArea = event.target.value;
             updateNextCollection();
@@ -210,6 +240,7 @@
         // Initialize app
         updateNextCollection();
         createCalendar();
+        sendTestNofication();
 
         // Request notification permission and schedule notifications
         if ("Notification" in window) {
