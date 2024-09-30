@@ -71,8 +71,9 @@
 
         <div id="next-collection"></div>
 
+        <h2>Collection Calendar</h2>
         <div id="calendar">
-            <h2>Collection Calendar</h2>
+           
             <!-- Calendar will be populated by JavaScript -->
         </div>
     </div>
@@ -119,8 +120,6 @@
             const today = new Date();
             const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
             const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
-
-            calendarDiv.innerHTML = '<h2>Collection Calendar</h2>';
 
             // Add day headers
             const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
