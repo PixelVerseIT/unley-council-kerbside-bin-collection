@@ -77,9 +77,16 @@
 </head>
 <body>
     <div id="app">
-        <h1 style="margin-bottom: 0px;">Kerbside Collection Reminder</h1>
-        <p style="margin-top: 0px;">Built by AI</p>
+        <h1 style="margin-bottom: 0px;">Unley Kerbside Collection Reminder</h1>
+        <p style="margin-top: 0px;">Built by AI. No Copyright 2024, Claude Inc. </p>
         
+        <div id="next-collection"></div>
+
+        <h2 style="margin-bottom: 0px;">Collection Calendar</h2>
+        <div id="calendar">
+            <!-- Calendar will be populated by JavaScript -->
+        </div>
+
         <div id="settings">
             <h2>Settings</h2>
             <label for="area-select">Choose your area:</label>
@@ -92,12 +99,7 @@
             </select>
         </div>
 
-        <div id="next-collection"></div>
-
-        <h2 style="margin-bottom: 0px;">Collection Calendar</h2>
-        <div id="calendar">
-            <!-- Calendar will be populated by JavaScript -->
-        </div>
+        
     </div>
 
     <script>
