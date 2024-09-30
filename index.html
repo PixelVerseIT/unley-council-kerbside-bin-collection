@@ -237,6 +237,17 @@
             scheduleNotifications();
         });
 
+        if ("Notification" in window) {
+            Notification.requestPermission().then(function (permission) {
+                if (permission === "granted") {
+                    sendTestNotification();
+                    scheduleNotifications();
+                }
+            });
+        } else {
+            alert("Notifications are not supported on this device. Please use an alternative method to receive reminders.");
+        }
+
         // Initialize app
         updateNextCollection();
         createCalendar();
