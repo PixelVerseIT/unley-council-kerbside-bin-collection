@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="apple-mobile-web-app-title" content="Bin Reminder">
+    <link rel="apple-touch-icon" href="/api/placeholder/180/180">
+    <title>Kerbside Collection Reminder</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        h1, h2 {
+            color: #0066cc;
+        }
+        #app {
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+        #settings, #next-collection, #calendar {
+            border: 1px solid #ccc;
+            padding: 15px;
+            border-radius: 5px;
+        }
+        #calendar {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .calendar-day {
+            border: 1px solid #ddd;
+            padding: 5px;
+            text-align: center;
+        }
+        .calendar-day.collection-day {
+            background-color: #e6f3ff;
+        }
+        .bin-icon {
+            width: 20px;
+            height: 20px;
+            display: inline-block;
+            margin-right: 5px;
+        }
+        .bin-green { background-color: green; }
+        .bin-yellow { background-color: yellow; }
+        .bin-blue { background-color: blue; }
+    </style>
+</head>
+<body>
+    <div id="app">
+        <h1>Kerbside Collection Reminder</h1>
+        
+        <div id="settings">
+            <h2>Settings</h2>
+            <label for="area-select">Choose your area:</label>
+            <select id="area-select">
+                <option value="mon">Monday (Leabrook)</option>
+                <option value="tue">Tuesday (Maple Ave)</option>
+                <option value="wed">Wednesday (Maud St)</option>
+                <option value="thu">Thursday (Wattle St)</option>
+                <option value="fri" selected>Friday (Fullarton)</option>
+            </select>
+        </div>
+
+        <div id="next-collection"></div>
+
+        <div id="calendar">
+            <h2>Collection Calendar</h2>
+            <!-- Calendar will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <script>
+        const areaSelect = document.getElementById('area-select');
+        const nextCollectionDiv = document.getElementById('next-collection');
+        const calendarDiv = document.getElementById('calendar');
+
+        const collectionSchedule = {
+            mon: 1, tue: 2, wed: 3, thu: 4, fri: 5
+        };
+
+        let userArea = 'fri'; // Default to Friday (Fullarton)
+
+        function getNextCollectionDay(day) {
+            const today = new Date();
+            const nextCollection = new Date(today);
+            nextCollection.setDate(today.getDate() + (day + 7 - today.getDay()) % 7);
+            return nextCollection;
+        }
+
+        function updateNextCollection() {
+            const nextCollection = getNextCollectionDay(collectionSchedule[userArea]);
+            const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
+            const dateString = nextCollection.toLocaleDateString('en-US', options);
+            
+            const weekNumber = Math.floor((nextCollection.getDate() - 1) / 7) + 1;
+            const isRecyclingWeek = weekNumber % 2 === 0;
+            const isGreenWasteWeek = !isRecyclingWeek;
+
+            nextCollectionDiv.innerHTML = `
+                <h2>Next Collection: ${dateString}</h2>
+                <p>Remember to put out your bins on the evening before:</p>
+                <ul>
+                    <li><span class="bin-icon bin-blue"></span>Blue waste to landfill bin (weekly)</li>
+                    ${isRecyclingWeek ? '<li><span class="bin-icon bin-yellow"></span>Yellow recycling bin (fortnightly)</li>' : ''}
+                    ${isGreenWasteWeek ? '<li><span class="bin-icon bin-green"></span>Green organics bin (fortnightly)</li>' : ''}
+                </ul>
+            `;
+        }
+
+        function createCalendar() {
+            const today = new Date();
+            const firstDay = new Date(today.getFullYear(), today.getMonth(), 1);
+            const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+
+            calendarDiv.innerHTML = '<h2>Collection Calendar</h2>';
+
+            // Add day headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = day;
+                dayElement.classList.add('calendar-day');
+                calendarDiv.appendChild(dayElement);
+            });
+
+            // Add empty cells for days before the 1st
+            for (let i = 0; i < firstDay.getDay(); i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.classList.add('calendar-day');
+                calendarDiv.appendChild(emptyDay);
+            }
+
+            // Add calendar days
+            for (let i = 1; i <= lastDay.getDate(); i++) {
+                const dayElement = document.createElement('div');
+                dayElement.textContent = i;
+                dayElement.classList.add('calendar-day');
+
+                const currentDate = new Date(today.getFullYear(), today.getMonth(), i);
+                if (currentDate.getDay() === collectionSchedule[userArea]) {
+                    dayElement.classList.add('collection-day');
+                    const weekNumber = Math.floor((i - 1) / 7) + 1;
+                    const isRecyclingWeek = weekNumber % 2 === 0;
+                    const isGreenWasteWeek = !isRecyclingWeek;
+
+                    dayElement.innerHTML += '<br><span class="bin-icon bin-blue"></span>';
+                    if (isRecyclingWeek) {
+                        dayElement.innerHTML += '<span class="bin-icon bin-yellow"></span>';
+                    }
+                    if (isGreenWasteWeek) {
+                        dayElement.innerHTML += '<span class="bin-icon bin-green"></span>';
+                    }
+                }
+
+                calendarDiv.appendChild(dayElement);
+            }
+        }
+
+        function sendNotification(message) {
+            if (Notification.permission === "granted") {
+                new Notification("Bin Collection Reminder", {
+                    body: message,
+                    icon: "/api/placeholder/64/64"
+                });
+            }
+        }
+
+        function scheduleNotifications() {
+            const nextCollection = getNextCollectionDay(collectionSchedule[userArea]);
+            const notificationDate = new Date(nextCollection);
+            notificationDate.setDate(notificationDate.getDate() - 1);
+            notificationDate.setHours(18, 0, 0, 0); // 6 PM the day before
+
+            const now = new Date();
+            const timeUntilNotification = notificationDate.getTime() - now.getTime();
+
+            if (timeUntilNotification > 0) {
+                setTimeout(() => {
+                    const weekNumber = Math.floor((nextCollection.getDate() - 1) / 7) + 1;
+                    const isRecyclingWeek = weekNumber % 2 === 0;
+                    const isGreenWasteWeek = !isRecyclingWeek;
+
+                    let message = "Don't forget to put out your blue bin tonight!";
+                    if (isRecyclingWeek) {
+                        message += " Also put out your yellow recycling bin.";
+                    }
+                    if (isGreenWasteWeek) {
+                        message += " Also put out your green organics bin.";
+                    }
+
+                    sendNotification(message);
+                }, timeUntilNotification);
+            }
+        }
+
+        areaSelect.addEventListener('change', (event) => {
+            userArea = event.target.value;
+            updateNextCollection();
+            createCalendar();
+            scheduleNotifications();
+        });
+
+        // Initialize app
+        updateNextCollection();
+        createCalendar();
+
+        // Request notification permission and schedule notifications
+        if ("Notification" in window) {
+            Notification.requestPermission().then(function (permission) {
+                if (permission === "granted") {
+                    scheduleNotifications();
+                }
+            });
+        }
+    </script>
+</body>
+</html>
